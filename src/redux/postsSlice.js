@@ -2,14 +2,14 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import Parse from "parse/dist/parse.min.js";
 
 export const fetchPosts = createAsyncThunk("posts/fetchPosts", async () => {
-  const query = new Parse.Query("Post");
+  const query = new Parse.Query("Post").include("creator");
   return await query.find();
 });
 
 export const fetchPostById = createAsyncThunk(
   "posts/fetchPostById",
   async (id) => {
-    const query = new Parse.Query("Post");
+    const query = new Parse.Query("Post").include("creator");
     return await query.get(id);
   }
 );
@@ -20,7 +20,15 @@ export const createPost = createAsyncThunk(
     const Post = new Parse.Object("Post");
     Post.set(formInformations);
 
-    return await Post.save();
+    return Post.save()
+      .then((res) => res)
+      .catch((err) => {
+        if (!err.response) {
+          throw err;
+        }
+
+        return thunkAPI.rejectWithValue(err.response.data);
+      });
   }
 );
 
@@ -94,6 +102,9 @@ export const postsSlice = createSlice({
     },
     [createPost.fulfilled]: (state, action) => {
       state.posts.push(action.payload);
+    },
+    [createPost.rejected]: (state, action) => {
+      console.log(action.error);
     },
     [updatePost.pending]: (state, action) => {
       console.log("pending");

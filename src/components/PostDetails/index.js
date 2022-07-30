@@ -48,13 +48,7 @@ const PostDetails = () => {
               {data.get("message")}
             </Typography>
             <Typography variant="h6">
-              Created by: {data.get("creator")}
-              {/* <Link
-                to={`/creators/${data.name}`}
-                style={{ textDecoration: "none", color: "#3f51b5" }}
-              >
-                {` ${data.name}`}
-              </Link> */}
+              Created by: {data.get("creator").get("username")}
             </Typography>
             <Typography variant="body1">
               {moment(data.get("createdAt")).fromNow()}

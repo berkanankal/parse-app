@@ -12,9 +12,9 @@ const Form = () => {
   const dispatch = useDispatch();
 
   const { currentId, posts } = useSelector((state) => state.posts);
+  const { user } = useSelector((state) => state.auth);
 
   const [formInformations, setFormInformations] = useState({
-    creator: "",
     title: "",
     message: "",
     tags: [],
@@ -28,7 +28,6 @@ const Form = () => {
   }, [currentId, posts]);
 
   const PostSchema = Yup.object().shape({
-    creator: Yup.string().required("Zorunlu alan"),
     title: Yup.string().required("Zorunlu alan"),
     message: Yup.string().required("Zorunlu alan"),
   });
@@ -51,7 +50,7 @@ const Form = () => {
         values.id = currentId;
         dispatch(updatePost(values));
       } else {
-        console.log(values);
+        values.creator = user;
         dispatch(createPost(values));
       }
       clearInputs();
@@ -73,6 +72,16 @@ const Form = () => {
     setFieldValue("tags", e.target.value.trim().split(","));
   };
 
+  if (!user) {
+    return (
+      <Paper className={classes.paper} elevation={6}>
+        <Typography variant="h6" align="center">
+          Please Sign In to create your own memories and like other's memories.
+        </Typography>
+      </Paper>
+    );
+  }
+
   return (
     <Paper className={classes.paper} elevation={6}>
       <form
@@ -82,33 +91,21 @@ const Form = () => {
         onSubmit={handleSubmit}
       >
         <Typography variant="h6">
-          {currentId ? "Editing memory" : "Creating a Memory"}
+          {currentId ? `Editing memory` : "Creating a Memory"}
         </Typography>
         <TextField
-          name="creator"
-          value={values.creator}
-          variant="outlined"
-          label="Creator"
-          fullWidth
-          onChange={handleChange}
-          onBlur={handleBlur}
-          error={errors.creator && touched.creator ? true : false}
-          helperText={errors.creator && touched.creator ? errors.creator : null}
-        />
-        <TextField
           name="title"
-          value={values.title}
           variant="outlined"
           label="Title"
           fullWidth
           onChange={handleChange}
           onBlur={handleBlur}
+          value={values.title}
           error={errors.title && touched.title ? true : false}
           helperText={errors.title && touched.title ? errors.title : null}
         />
         <TextField
           name="message"
-          value={values.message}
           variant="outlined"
           label="Message"
           fullWidth
@@ -116,6 +113,7 @@ const Form = () => {
           rows={4}
           onChange={handleChange}
           onBlur={handleBlur}
+          value={values.message}
           error={errors.message && touched.message ? true : false}
           helperText={errors.message && touched.message ? errors.message : null}
         />
@@ -124,8 +122,8 @@ const Form = () => {
           variant="outlined"
           label="Tags (coma separated)"
           fullWidth
-          value={values.tags}
           onChange={handleTagsInput}
+          value={values.tags}
         />
         <div className={classes.fileInput}>
           <input type="file" />
@@ -151,5 +149,4 @@ const Form = () => {
     </Paper>
   );
 };
-
 export default Form;

@@ -1,12 +1,16 @@
 import React from "react";
 import "./App.css";
-import Parse from "parse/dist/parse.min.js";
 import { Container } from "@mui/material";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./components/Home";
 import Navbar from "./components/Navbar";
 import PostDetails from "./components/PostDetails";
 import Auth from "./components/Auth";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Parse from "parse/dist/parse.min.js";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser } from "./redux/authSlice";
 
 const { REACT_APP_PARSE_APPLICATION_ID, REACT_APP_PARSE_JAVASCRIPT_KEY } =
   process.env;
@@ -18,8 +22,17 @@ Parse.initialize(
 Parse.serverURL = PARSE_HOST_URL;
 
 const App = () => {
+  const dispatch = useDispatch();
+
+  const currentUser = Parse.User.current();
+
+  if (currentUser) {
+    dispatch(setUser(currentUser));
+  }
+
   return (
     <Container maxWidth="lg">
+      <ToastContainer />
       <BrowserRouter>
         <Navbar />
         <Routes>

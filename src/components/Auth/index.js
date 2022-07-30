@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Avatar,
   Button,
@@ -13,13 +13,20 @@ import Input from "./Input";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useDispatch, useSelector } from "react-redux";
-import { register } from "../../redux/authSlice";
+import { register, login, resetInitialState } from "../../redux/authSlice";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Auth = () => {
   const [isSignupForm, setIsSignupForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const classes = useStyles();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { isLoggedIn, isSignup, error, user } = useSelector(
+    (state) => state.auth
+  );
 
   const registerSchema = Yup.object().shape({
     name: Yup.string()
@@ -68,15 +75,51 @@ const Auth = () => {
     validationSchema: isSignupForm ? registerSchema : loginSchema,
     onSubmit: (values) => {
       if (isSignupForm) {
-        console.log(values);
-
         dispatch(register(values));
       } else {
-        // const loginForm = { email: values.email, password: values.password };
-        // dispatch(login(loginForm));
+        dispatch(login(values));
       }
     },
   });
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate("/");
+      toast.success(`Hoşgeldin ${user.get("username")}`, {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+    if (isSignup) {
+      navigate("/");
+      toast.success("Kayıt işlemi başarılı", {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+    if (error) {
+      toast.error(error, {
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    }
+    dispatch(resetInitialState());
+  }, [isLoggedIn, isSignup, error, dispatch, user, navigate]);
 
   const switchMode = () => {
     resetForm();

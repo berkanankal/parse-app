@@ -9,17 +9,22 @@ import {
 } from "@mui/material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
+import ThumbUpAltOutlined from "@mui/icons-material/ThumbUpAltOutlined";
 import useStyles from "./styles";
 import moment from "moment";
 import { setCurrentId } from "../../../redux/postsSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { deletePost } from "../../../redux/postsSlice";
 import { useNavigate } from "react-router-dom";
+import Parse from "parse/dist/parse.min.js";
 
 const Post = ({ post }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const { user } = useSelector((state) => state.auth);
 
   const handleSetCurrentId = (id) => {
     dispatch(setCurrentId(id));
@@ -47,22 +52,26 @@ const Post = ({ post }) => {
           title="xxxxxxxxxx"
         />
         <div className={classes.overlay}>
-          <Typography variant="h6">{post.get("creator")}</Typography>
+          <Typography variant="h6">
+            {post.get("creator").get("username")}
+          </Typography>
           <Typography variant="body2">
             {moment(post.createdAt).fromNow()}
           </Typography>
         </div>
-        <div className={classes.overlay2} name="edit">
-          <Button
-            style={{ color: "white" }}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleSetCurrentId(post.id);
-            }}
-          >
-            <MoreHorizIcon />
-          </Button>
-        </div>
+        {user && user.id === post.get("creator").id && (
+          <div className={classes.overlay2} name="edit">
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSetCurrentId(post.id);
+              }}
+              style={{ color: "white" }}
+            >
+              <MoreHorizIcon />
+            </Button>
+          </div>
+        )}
 
         <div className={classes.details}>
           <Typography variant="body2" color="textSecondary" component="h2">
@@ -84,13 +93,15 @@ const Post = ({ post }) => {
         </CardContent>
       </ButtonBase>
       <CardActions className={classes.cardActions}>
-        <Button
-          size="small"
-          color="secondary"
-          onClick={() => handleDelete(post.id)}
-        >
-          <DeleteIcon fontSize="small" /> &nbsp; Delete
-        </Button>
+        {user && user.id === post.get("creator").id && (
+          <Button
+            size="small"
+            color="secondary"
+            onClick={() => handleDelete(post._id)}
+          >
+            <DeleteIcon fontSize="small" /> &nbsp; Delete
+          </Button>
+        )}
       </CardActions>
     </Card>
   );
