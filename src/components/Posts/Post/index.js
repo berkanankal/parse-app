@@ -17,7 +17,6 @@ import { setCurrentId } from "../../../redux/postsSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { deletePost } from "../../../redux/postsSlice";
 import { useNavigate } from "react-router-dom";
-import Parse from "parse/dist/parse.min.js";
 
 const Post = ({ post }) => {
   const classes = useStyles();
@@ -31,6 +30,7 @@ const Post = ({ post }) => {
   };
 
   const handleDelete = (id) => {
+    console.log(id);
     dispatch(deletePost(id));
   };
 
@@ -97,7 +97,7 @@ const Post = ({ post }) => {
           <Button
             size="small"
             color="secondary"
-            onClick={() => handleDelete(post._id)}
+            onClick={() => handleDelete(post.id)}
           >
             <DeleteIcon fontSize="small" /> &nbsp; Delete
           </Button>

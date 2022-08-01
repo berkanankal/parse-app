@@ -20,6 +20,8 @@ export const createPost = createAsyncThunk(
     const Post = new Parse.Object("Post");
     Post.set(formInformations);
 
+    console.log(formInformations);
+
     return Post.save()
       .then((res) => res)
       .catch((err) => {

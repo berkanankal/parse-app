@@ -4,6 +4,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { createPost, setCurrentId, updatePost } from "../../redux/postsSlice";
 import { useDispatch, useSelector } from "react-redux";
+import Parse from "parse/dist/parse.min.js";
 
 import useStyles from "./styles";
 
@@ -47,10 +48,23 @@ const Form = () => {
     validationSchema: PostSchema,
     onSubmit: (values) => {
       if (currentId) {
-        values.id = currentId;
+        values = { ...values, id: currentId };
+        if (!values.postImage.metadata) {
+          values.postImage = new Parse.File(
+            values.postImage.name,
+            values.postImage
+          );
+        }
+
         dispatch(updatePost(values));
       } else {
         values.creator = user;
+        if (values.postImage) {
+          values.postImage = new Parse.File(
+            values.postImage.name,
+            values.postImage
+          );
+        }
         dispatch(createPost(values));
       }
       clearInputs();
@@ -70,6 +84,10 @@ const Form = () => {
 
   const handleTagsInput = (e) => {
     setFieldValue("tags", e.target.value.trim().split(","));
+  };
+
+  const handlePhoto = (e) => {
+    setFieldValue("postImage", e.target.files[0]);
   };
 
   if (!user) {
@@ -126,7 +144,7 @@ const Form = () => {
           value={values.tags}
         />
         <div className={classes.fileInput}>
-          <input type="file" />
+          <input type="file" onChange={handlePhoto} />
         </div>
         <Button
           className={classes.buttonSubmit}
